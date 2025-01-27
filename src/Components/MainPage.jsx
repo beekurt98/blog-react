@@ -30,12 +30,17 @@ export function MainPage({ changePage, setCurrPage }) {
 
   return (
     <>
+    <div className="editor-btn-cont">
       <div className="editor-btns">
         <button onClick={() => setSearching(!searching)} className="btn search-btn">{searchSvg}</button>
         {
           searching && <input className='search-input' onChange={(e) => handleQuickSearch(e.target.value)} autoComplete='off' type="text" name='search' placeholder='search...' />
         }
       </div>
+
+    </div>
+      
+      <div className="current-page">
       <div className="posts-div">
         {
           posts.map((post, index) => {
@@ -47,7 +52,7 @@ export function MainPage({ changePage, setCurrPage }) {
             </div>
           })
         }
-      </div>
+      </div></div>
     </>
   )
 }

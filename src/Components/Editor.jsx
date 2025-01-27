@@ -10,6 +10,8 @@ export function Editor() {
   const [selectedPost, setSelectedPost] = useState(null)
   const [imgUploaded, setImgUploaded] = useState(false)
   const [currentBody, setCurrentBody] = useState(null)
+  const [username, setUsername] = useState("")
+  const [password, setPassword] = useState("")
 
   const editTextareaRef = useRef(null)
   const addTextareaRef = useRef(null)
@@ -23,6 +25,27 @@ export function Editor() {
       setPosts(data)
     }
     getData()
+
+    const storedUsername = localStorage.getItem("username");
+    const storedPassword = localStorage.getItem("password");
+
+    if (!storedUsername || !storedPassword) {
+      const username = prompt("Username?");
+      const password = prompt("Password?");
+
+      if (username) {
+        localStorage.setItem("username", username);
+        setUsername(username);
+      }
+      if (password) {
+        localStorage.setItem("password", password);
+        setPassword(password);
+      }
+    } else {
+      setUsername(storedUsername);
+      setPassword(storedPassword);
+    }
+
   }, [])
 
   useEffect(() => {
@@ -34,15 +57,18 @@ export function Editor() {
     getData()
   }, [selectedPostId])
 
-  function handleEditSubmit(e) {
+  async function handleEditSubmit(e) {
     e.preventDefault()
 
     const formData = new FormData(e.target)
     const formObj = Object.fromEntries(formData)
 
-    fetch(url + '/' + selectedPostId,
+    await fetch(url + '/' + selectedPostId,
       {
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Basic ${btoa(`${username}:${password}`)}`,
+        },
         method: 'PUT',
         body: JSON.stringify(formObj)
       }
@@ -56,15 +82,20 @@ export function Editor() {
 
   async function handleNewSubmit(e) {
     e.preventDefault()
+    console.log(localStorage.getItem("username"))
+
     const formData = new FormData(e.target)
     const formObj = Object.fromEntries(formData)
     const newPost = await fetch(url,
       {
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Basic ${btoa(`${username}:${password}`)}`,
+        },
         method: 'POST',
         body: JSON.stringify(formObj)
       })
-    setPosts([...posts, newPost])
+    setPosts([...posts, formObj])
     addNewRef.current.close()
   }
 
@@ -73,7 +104,10 @@ export function Editor() {
     console.log(url + "/" + id)
     fetch(url + "/" + id,
       {
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Basic ${btoa(`${username}:${password}`)}`
+        },
         method: 'DELETE'
       })
     setPosts(posts.filter(x => x.id != id))
@@ -108,11 +142,13 @@ export function Editor() {
 
   return (
     <>
-    <div className="editor-btns">
-    <button className='btn new-btn' onClick={() => { setCurrentBody(""); addNewRef.current.showModal() }}>{plusSvg}</button>
+      <div className="editor-btn-cont">
+        <div className="editor-btns">
+          <button className='btn new-btn' onClick={() => { setCurrentBody(""); addNewRef.current.showModal() }}>{plusSvg}</button>
 
-    </div>
-      <div className="posts-editable">      
+        </div>
+      </div>
+      <div className="posts-editable">
         {
           posts.map((post, index) => {
             return <>

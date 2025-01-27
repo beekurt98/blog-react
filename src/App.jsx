@@ -49,12 +49,10 @@ function App() {
         </div>
         
       </div>
-      <div className="current-page">
 
         {currentPage}
-      </div>
       <footer>
-        Made with love by Bee
+        Made with ❤ by Bee
       </footer>
     </>
   )
