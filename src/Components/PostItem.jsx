@@ -16,15 +16,16 @@ export function PostDetail({ id, changePage }) {
 
   return (
     <>
-   <div className="editor-btns"><button onClick={() => changePage(null)} className="back-btn btn">←</button></div>
-      
+      <div className="editor-btn-cont">
+        <div className="editor-btns"><button onClick={() => changePage(null)} className="back-btn btn">←</button></div>
+      </div>
       <div className="post-detail">
         <h2>{post?.title}</h2>
         <img src={post?.imageUrl} alt="" />
         <p>{post?.summary}</p>
         {post?.body && <div className='comment-content' dangerouslySetInnerHTML={{ __html: marked.parse(post?.body) }} />}
         <p>This post was created at: {post?.created}</p>
-        </div>
+      </div>
 
     </>
   )
