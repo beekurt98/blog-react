@@ -10,14 +10,23 @@ export function Editor() {
   const [selectedPost, setSelectedPost] = useState(null)
   const [imgUploaded, setImgUploaded] = useState(false)
   const [currentBody, setCurrentBody] = useState(null)
-  const [username, setUsername] = useState("")
-  const [password, setPassword] = useState("")
+  const [username, setUsername] = useState(localStorage.username ?? "")
+  const [password, setPassword] = useState(localStorage.password ?? "")
 
   const editTextareaRef = useRef(null)
   const addTextareaRef = useRef(null)
 
   const addNewRef = useRef(null)
   const editRef = useRef(null)
+
+  function promptLogin() {
+    const inputUsername = prompt('username');
+    const inputPassword = prompt('password')
+    setUsername(inputUsername)
+    setPassword(inputPassword)
+    localStorage.username = inputUsername
+    localStorage.password = inputPassword
+  }
 
   useEffect(() => {
     async function getData() {
@@ -26,24 +35,8 @@ export function Editor() {
     }
     getData()
 
-    const storedUsername = localStorage.getItem("username");
-    const storedPassword = localStorage.getItem("password");
-
-    if (!storedUsername || !storedPassword) {
-      const username = prompt("Username?");
-      const password = prompt("Password?");
-
-      if (username) {
-        localStorage.setItem("username", username);
-        setUsername(username);
-      }
-      if (password) {
-        localStorage.setItem("password", password);
-        setPassword(password);
-      }
-    } else {
-      setUsername(storedUsername);
-      setPassword(storedPassword);
+    if (username === '') {
+      promptLogin();
     }
 
   }, [])
@@ -86,7 +79,7 @@ export function Editor() {
 
     const formData = new FormData(e.target)
     const formObj = Object.fromEntries(formData)
-    const newPost = await fetch(url,
+    const request = await fetch(url,
       {
         headers: {
           'Content-Type': 'application/json',
@@ -94,8 +87,15 @@ export function Editor() {
         },
         method: 'POST',
         body: JSON.stringify(formObj)
-      })
-    setPosts([...posts, formObj])
+      }
+    )
+
+    if (!request.ok) {
+      alert('ekleme yapılamadı.');
+      return;
+    }
+    const newPost = await request.json();
+    setPosts([...posts, newPost])
     addNewRef.current.close()
   }
 
